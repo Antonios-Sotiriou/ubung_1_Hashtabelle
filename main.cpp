@@ -3,16 +3,17 @@
 #include "headers/menu.h"
 
 int verifyInput(std::string &input);
-int hashFunction(std::string &str);
 void dispatchInput(int input);
+void clearScreen(void);
+void logError(const char error[]);
+void logInfo(const char error[]);
 
 int main(int argc, char argv[]) {
 	using namespace std;
 
 	string input;
-	string aktie = "AAPL";
-
 	while (1) {
+
 		displayMenu();
 		cin >> input;
 		int option = verifyInput(input);
@@ -26,13 +27,13 @@ int main(int argc, char argv[]) {
 	return 0;
 }
 int verifyInput(std::string &input) {
-	std::cout << "\x1b[H\x1b[J";
+	clearScreen();
 	if (input.length() > 1) {
-		std::cout << CURSOR_ERROR << "0H\x1b[2K\x1b[31m Invalid length\x1b[0m" << std::endl;
+		logError("Invalid length");
 		return -1;
 	} else {
 		if (input[0] < 48 || input[0] > 57) {
-			std::cout << CURSOR_ERROR << "0H\x1b[2K\x1b[31m " << input << " is not a number\x1b[0m" << std::endl;
+			logError("Not a number");
 			return -1;
 		}
 		return input[0] - 48;
@@ -63,12 +64,15 @@ void dispatchInput(int input) {
 			// LOAD
 			break;
 		default:
-			std::cout << CURSOR_ERROR << "0H\x1b[2K\x1b[31m Only numbers between 1 and 8 are valid\x1b[0m" << std::endl; 
+			logError("Only numbers between 1 and 8 are valid");
 	}
 }
-void logError(char error[]) {
+void clearScreen(void) {
+	std::cout << "\x1b[H\x1b[J";
+}
+void logError(const char error[]) {
 	std::cout << "\x1b[24;0H\x1b[2K\x1b[31m" << error << "\x1b[0m" << std::endl;
 }
-void logInfo(char error[]) {
-	std::cout << "\x1b[24;0H\x1b[2K\x1b[32m" << error << "\x1b[0m" << std::endl;
+void logInfo(const char info[]) {
+	std::cout << "\x1b[24;0H\x1b[2K\x1b[32m" << info << "\x1b[0m" << std::endl;
 }
