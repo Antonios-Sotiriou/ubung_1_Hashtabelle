@@ -7,27 +7,31 @@
 #include "headers/structs.h"
 
 #define AKTIEN_PATH       "C:/Users/anton/Desktop/Bachelor_Informatik/Semester_2/ALGOS/ubung_1_Hashtabelle/aktien/"
-#define AKTIE_NAME        "APPLE"
+#define AKTIE_NAME        "MICROSOFT"
 #define NUM_OF_AKTIEN     999
 
 int verifyInput(std::string &input);
 void dispatchInput(AktieData *aktData, int input);
+void setTerminalSize(const int rows, const int columns);
 void clearScreen(void);
 void logError(const char error[]);
 void logInfo(const char error[]);
 void import(AktieData *aktData, std::string aktie_name, int num_of_aktien);
 void initAktie(std::ifstream &file, AktieData &aktie);
 void plot(AktieData *aktData, std::string aktie_name, int num_of_aktien);
+void sortFloatArray(float arr[], const int array_length);
 
 int main(int argc, char argv[]) {
 	using namespace std;
 
 	AktieData *aktData = new AktieData[sizeof(AktieData) * NUM_OF_AKTIEN];  // Hardcoded Value for Aktien. Must be changed!
 
+	setTerminalSize(31, 120);
+
 	string input;
 	while (1) {
 
-		//displayMenu();
+		displayMenu();
 		cin >> input;
 		int option = verifyInput(input);
 		if (option == 8) {
@@ -82,6 +86,9 @@ void dispatchInput(AktieData *aktData, int input) {
 		default:
 			logError("Only numbers between 1 and 8 are valid");
 	}
+}
+void setTerminalSize(const int rows, const int columns) {
+	std::cout << "\x1b[8;" << rows << ";" << columns << "t";
 }
 void clearScreen(void) {
 	std::cout << CLEAR_SCREEN;
@@ -150,29 +157,52 @@ void plot(AktieData *aktData, std::string aktie_name, int num_of_aktien) {
 	std::cout << std::fixed;
 	std::cout << std::setprecision(2);
 
-	int move_left = 0;
-	float previous_price = ~(1 << 31);
+
+	float sorted_prices[30];
 	for (int i = 29; i >= 0; i--) {
-		std::cout << aktData[i].close << "|";
-		std::cout << "\x1b[" << 88 - move_left << "C*" << std::endl;
+		sorted_prices[i] = aktData[i].close;
+	}
+	sortFloatArray(sorted_prices, 30);
 
-		//if (previous_price < aktData[i].close) {
-		//	std::cout << "\x1b[" << 30 - move_left << "C\\" << std::endl;
-		//} else if (previous_price > aktData[i].close) {
-		//	std::cout << "\x1b[" << 30 - move_left << "C/" << std::endl;
-		//} else {
-		//	std::cout << "\x1b[" << 30 - move_left << "C-" << std::endl;
-		//}
+	int move_left = 0;
+	for (int i = 29; i >= 0; i--) {
+		std::cout << sorted_prices[i] << "|";
 
-		previous_price = aktData[i].close;
+		std::cout << "\x1b[" << 88 - move_left << "C" << std::endl;
+
 		move_left += 3;
 	}
 
-	std::cout << "\x1b[30;0HDay    ";
+	int cursor_left = 8;
+	std::cout << "\x1b[31;0HDay   |";
 	for (int i = 29; i >= 0; i--) {
-		std::cout << aktData[i].date.substr(3, 2) << "|";
+		std::cout << "\x1b[31;" << cursor_left << "H" << aktData[i].date.substr(3, 2) << "|";
+
+		int prices_index = 0;
+		while ((aktData[i].close >= sorted_prices[prices_index]) && (prices_index < 30)) {
+			std::cout << "\x1b[" << 30 - prices_index << ";" << cursor_left << "H*";
+			std::cout << "\x1b[" << 30 - prices_index << ";" << cursor_left + 1 << "H*";
+			//std::cout << "\x1b[" << 29 - prices_index << ";" << cursor_left + 2 << "H*";
+			prices_index++;
+		}
+
+		cursor_left += 3;
 	}
+	std::cout << "\x1b[31;99H\x1b[?25l\x1b[8m";
 
 	getchar();
 	getchar();
+	system("cls");
+}
+void sortFloatArray(float arr[], const int array_length) {
+
+	for (int x = 0; x < array_length; x++) {
+		for (int y = 0; y < array_length; y++) {
+			if (arr[x] < arr[y]) {
+				float temp = arr[x];
+				arr[x] = arr[y];
+				arr[y] = temp;
+			}
+		}
+	}
 }
