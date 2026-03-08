@@ -30,5 +30,5 @@ void displayMenu(void) {
 	cout << "|    7. LOAD      |" << endl;
 	cout << "|    8. QUIT      |" << endl;
 	cout << " ----------------- " << endl;
-	cout << " Choose an Option[1-8]: " << CURSOR_HOME <<"24H\x1b[K";
+	cout << " Choose an Option[1-8]: " << CURSOR_INPUT <<"24H\x1b[K";
 }
