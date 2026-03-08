@@ -4,12 +4,11 @@
 void displayMenu(void) {
 	using namespace std;
 	
-	cout << "\x1b[H";
-	cout << "\x1b[1J";      // Erase from the start of the screen until cursor position.
+	cout << CLEAR_SCREEN;
 
-	cout << "       \x1b[33m\x1b[4mAvailable Aktien\x1b[0m\x1b[0m " << endl;
+	cout << "       \x1b[0m\x1b[33m\x1b[4mAvailable Aktien\x1b[0m\x1b[0m " << endl;
 	cout << "| Nr | Kuerzel | Name      | WKN    |" << endl;
-	cout << "|-----------------------------------| " << endl;
+	cout << "|-----------------------------------|" << endl;
 	cout << "| 1  | AAPL    | APPLE     | 865985 |" << endl;
 	cout << "| 2  | AMD     | AMD       | 863186 |" << endl;
 	cout << "| 3  | AMZN    | AMAZON    | 906866 |" << endl;
