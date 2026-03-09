@@ -7,7 +7,15 @@
 #include "headers/structs.h"
 
 #define AKTIEN_PATH       "C:/Users/anton/Desktop/Bachelor_Informatik/Semester_2/ALGOS/ubung_1_Hashtabelle/aktien/"
-#define AKTIE_NAME        "MICROSOFT"
+#define AMAZON            "AMAZON"
+#define AMD               "AMD"
+#define APPLE             "APPLE"
+#define CISCO             "CISCO"
+#define META              "META"
+#define MICROSOFT         "MICROSOFT"
+#define QUALCOMM          "QUALCOMM"
+#define TESLA             "TESLA"
+
 #define NUM_OF_AKTIEN     999
 
 int verifyInput(std::string &input);
@@ -84,14 +92,14 @@ void dispatchInput(AktieData *aktData, int input) {
 			break;
 		case 3:
 			// IMPORT
-			import(aktData, AKTIE_NAME, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
+			import(aktData, TESLA, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
 			break;
 		case 4:
 			// SEARCH
 			break;
 		case 5:
 			// PLOT
-            plot(aktData, AKTIE_NAME, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
+            plot(aktData, TESLA, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
 			break;
 		case 6:
 			// SAVE
