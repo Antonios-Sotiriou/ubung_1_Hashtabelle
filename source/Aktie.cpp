@@ -15,17 +15,30 @@ Aktie::Aktie(string name, string wkn, string kuerzel) {
 }
 
 Aktie::~Aktie() {
-	
+	//if (aktData != nullptr)
+	//    delete[] aktData;
 }
 
 string Aktie::getName() {
-	return kuerzel;
+	return name;
+}
+
+void Aktie::setName(const string newName) {
+	name = newName;
 }
 
 string Aktie::getKuerzel() {
-	return name;
+	return kuerzel;
+}
+
+void Aktie::setKuerzel(const string newKuerzel) {
+	kuerzel = newKuerzel;
 }
 
 string Aktie::getWkn() {
 	return wkn;
+}
+
+void Aktie::setWkn(const string newWkn) {
+	wkn = newWkn;
 }
