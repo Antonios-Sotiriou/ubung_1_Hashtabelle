@@ -9,7 +9,7 @@ endif()
 project (hashtable)
 
 # Fügen Sie der ausführbaren Datei dieses Projekts eine Quelle hinzu.
-add_executable (hashtable "main.cpp" "headers/menu.h" "source/menu.cpp" "headers/structs.h" "headers/main.h")
+add_executable (hashtable "main.cpp" "source/menu.cpp" "source/Aktie.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET hashtable PROPERTY CXX_STANDARD 20)
