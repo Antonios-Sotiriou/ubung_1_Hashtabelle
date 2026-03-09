@@ -44,6 +44,22 @@ int main(int argc, char argv[]) {
 	delete[] aktData;
 	return 0;
 }
+
+int hashFunction(std::string& str){
+	int hash = 0;
+	int length = 4;
+
+	if (str.length() < 4) {
+		length = static_cast<int>(str.length());
+	}
+
+	for (int i = 0; i < length; i++) {
+		hash += str[i] * static_cast<int>(std::pow(31, length - (i + 1)));
+	}
+
+	return hash;
+}
+
 int verifyInput(std::string &input) {
 	clearScreen();
 	if (input.length() > 1) {
