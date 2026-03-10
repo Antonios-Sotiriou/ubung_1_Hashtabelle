@@ -288,9 +288,5 @@ void load(Aktie *aktien, const int hash_table_size) {
 		file >> aktien[i].wkn;
 	}
 
-	std::cout << aktien[633].name << endl;
-	std::cout << aktien[633].kuerzel << endl;
-	std::cout << aktien[633].wkn << endl;
-
 	file.close();
 }
