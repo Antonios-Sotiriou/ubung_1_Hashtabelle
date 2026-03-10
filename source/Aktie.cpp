@@ -6,17 +6,18 @@ Aktie::Aktie() {
 	this->kuerzel = "";
 	this->name = "";
 	this->wkn = "";
+	this->aktData = nullptr;
 }
 
-Aktie::Aktie(string name, string wkn, string kuerzel) {
+Aktie::Aktie(string name,  string kuerzel, string wkn) {
 	this->kuerzel = kuerzel;
 	this->name = name;
 	this->wkn = wkn;
+	this->aktData = nullptr;
 }
 
 Aktie::~Aktie() {
-	//if (aktData != nullptr)
-	//    delete[] aktData;
+	freeAktData();
 }
 
 string Aktie::getName() {
@@ -41,4 +42,10 @@ string Aktie::getWkn() {
 
 void Aktie::setWkn(const string newWkn) {
 	wkn = newWkn;
+}
+void Aktie::freeAktData(void) {
+	if (aktData != nullptr) {
+		delete aktData;
+		aktData = nullptr;
+	}
 }
