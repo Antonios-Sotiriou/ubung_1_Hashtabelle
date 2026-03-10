@@ -19,13 +19,14 @@ class Aktie {
 		string getWkn();
 		void setWkn(const string newWkn);
 
-		AktieData *aktData;
 
-		string wkn; //Wertpapierkennnummer
+		string wkn;         //Wertpapierkennnummer
 		string name;
 		string kuerzel;
-		//Kursdaten
+		AktieData *aktData; //Kursdaten
+
 	private:
+		void freeAktData(void);
 };
 
 #endif // !AKTIE_H

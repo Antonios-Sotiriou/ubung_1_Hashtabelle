@@ -41,7 +41,7 @@ int main(int argc, char argv[]) {
 
 	//AktieData *aktData = new AktieData[sizeof(AktieData) * NUM_OF_AKTIEN];  // Hardcoded Value for Aktien. Must be changed!
 	Aktie *aktien = new Aktie[sizeof(Aktie) * HASH_TABLE_SIZE];
-	aktien[633] = Aktie("AMAZON", "906866", "AMZN");
+	aktien[633] = Aktie("AMAZON", "AMZN", "906866");
 
 	setTerminalSize(31, 120);
 
@@ -99,14 +99,12 @@ void dispatchInput(Aktie *aktien, int input) {
 			// DEL
 			break;
 		case 3:
-			// IMPORT
 			import(aktien, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
 			break;
 		case 4:
 			// SEARCH
 			break;
 		case 5:
-			// PLOT
             plot(aktien, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
 			break;
 		case 6:
@@ -137,17 +135,19 @@ void clearLogs(void) {
 }
 void import(Aktie *aktien, int num_of_aktien) {
 	clearLogs();
-	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mName of Aktie to import: \x1b[23;10H\x1b[0m" << std::endl;
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mName of Aktie to import: \x1b[23;26H\x1b[0m";
 	string name;
 	std::cin >> name;
 
 	int aktie_index = hashFunction(name, HASH_TABLE_SIZE);
-	aktien[aktie_index].aktData = new AktieData[sizeof(AktieData) * num_of_aktien];
+	if (aktien[aktie_index].aktData == nullptr) {
+	    aktien[aktie_index].aktData = new AktieData[sizeof(AktieData) * num_of_aktien];
+	}
 
 	std::ifstream myReadFile(aktien[aktie_index].name.insert(0, AKTIEN_PATH).append(".csv"));
 
 	if (!myReadFile.is_open()) {
-		std::cout << CURSOR_INFO << "\x1b[2K\x1b[32m" << "Could not found aktie file with name:  " << name << "\x1b[0m" << std::endl;
+		std::cout << CURSOR_INFO << "\x1b[2K\x1b[31m" << "Could not found aktie file with name: " << name << "\x1b[0m" << std::endl;
 		return;
 	}
 
@@ -191,7 +191,8 @@ void initAktie(std::ifstream &file, AktieData *aktieData) {
 }
 void plot(Aktie *aktien, int num_of_aktien) {
 
-	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mName of Aktie to Plot: \x1b[23;10H\x1b[0m" << std::endl;
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mName of Aktie to Plot: \x1b[23;24H\x1b[0m";
+	std::cout << "\x1b[0J";
 	string name;
 	std::cin >> name;
 
@@ -202,6 +203,10 @@ void plot(Aktie *aktien, int num_of_aktien) {
 	std::cout << std::setprecision(2);
 
 	int aktie_index = hashFunction(name, HASH_TABLE_SIZE);
+	if (aktien[aktie_index].aktData == nullptr) {
+		logError("Aktie not found!");
+		return;
+	}
 
 	float sorted_prices[30];
 	for (int i = 29; i >= 0; i--) {                   // O(n)
@@ -252,11 +257,11 @@ void sortFloatArray(float arr[], const int array_length) {
 	}
 }
 void save(Aktie *aktien, const int hash_table_size) {
-	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mFilenname to save hash table into: \x1b[0m" << std::endl;
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[31mFilenname to save hash table into: \x1b[0m";
 	string filename;
 	std::cin >> filename;
 
-    std::fstream file(filename.insert(0, AKTIEN_PATH), std::ios::out | std::ios::in | std::ios::trunc);
+    std::fstream file(filename.insert(0, DATABASE_PATH), std::ios::out | std::ios::in | std::ios::trunc);
 
 	for (int i = 0; i < HASH_TABLE_SIZE; i++) {
 		file.write(aktien[i].getName().c_str(), aktien[i].getName().length());
@@ -267,13 +272,13 @@ void save(Aktie *aktien, const int hash_table_size) {
 	file.close();
 }
 void load(Aktie *aktien, const int hash_table_size) {
-	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mFilename to load hash table from: \x1b[0m" << std::endl;
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mFilename to load hash table from: \x1b[0m";
 	string filename;
 	std::cin >> filename;
 
-    std::fstream file(filename.insert(0, AKTIEN_PATH));
+    std::fstream file(filename.insert(0, DATABASE_PATH));
 	if (!file.is_open()) {
-		std::cout << CURSOR_INFO << "\x1b[2K\x1b[32m" << "Could not read file!  " << filename << "\x1b[0m" << std::endl;
+		std::cout << CURSOR_INFO << "\x1b[2K\x1b[31m" << "Could not read file: " << filename << "\x1b[0m" << std::endl;
 		return;
 	}
 
