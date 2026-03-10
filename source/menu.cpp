@@ -4,7 +4,9 @@
 void displayMenu(void) {
 	using namespace std;
 	
-	cout << CLEAR_SCREEN;
+	cout << "\x1b[H";
+	//cout << CLEAR_SCREEN;
+	cout << "\x1b[23;\x1b[1J";
 
 	cout << "       \x1b[0m\x1b[33m\x1b[4mAvailable Aktien\x1b[0m\x1b[0m " << endl;
 	cout << "| Nr | Kuerzel | Name      | WKN    |" << endl;

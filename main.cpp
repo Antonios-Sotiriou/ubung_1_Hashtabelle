@@ -28,12 +28,13 @@ void setTerminalSize(const int rows, const int columns);
 void clearScreen(void);
 void logError(const char error[]);
 void logInfo(const char error[]);
+void clearLogs(void);
 void import(Aktie *aktien, int num_of_aktien);
 void initAktie(std::ifstream &file, AktieData *aktieData);
 void plot(Aktie *aktien, int num_of_aktien);
 void sortFloatArray(float arr[], const int array_length);
-void save(Aktie* aktien, const int hash_table_size, std::string file_name);
-void load(Aktie *aktien, const int hash_table_size, std::string file_name);
+void save(Aktie* aktien, const int hash_table_size);
+void load(Aktie *aktien, const int hash_table_size);
 
 int main(int argc, char argv[]) {
 	using namespace std;
@@ -76,7 +77,7 @@ int hashFunction(std::string& str, const int hash_table_size) {
 	return hash % hash_table_size;
 }
 int verifyInput(std::string &input) {
-	//clearScreen();
+
 	if (input.length() > 1) {
 		logError("Invalid length");
 		return -1;
@@ -109,10 +110,10 @@ void dispatchInput(Aktie *aktien, int input) {
             plot(aktien, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
 			break;
 		case 6:
-			save(aktien, HASH_TABLE_SIZE, "hash_table");
+			save(aktien, HASH_TABLE_SIZE);
 			break;
 		case 7:
-			load(aktien, HASH_TABLE_SIZE, "hash_table");
+			load(aktien, HASH_TABLE_SIZE);
 			break;
 		default:
 			logError("Only numbers between 1 and 8 are valid");
@@ -130,8 +131,12 @@ void logError(const char error[]) {
 void logInfo(const char info[]) {
 	std::cout << CURSOR_INFO << "\x1b[2K\x1b[32m" << info << "\x1b[0m" << std::endl;
 }
+void clearLogs(void) {
+	std::cout << CURSOR_ERROR << "\x1b[2K\x1b[0m" << std::endl;
+	std::cout << CURSOR_INFO << "\x1b[2K\x1b[0m" << std::endl;
+}
 void import(Aktie *aktien, int num_of_aktien) {
-
+	clearLogs();
 	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mName of Aktie to import: \x1b[23;10H\x1b[0m" << std::endl;
 	string name;
 	std::cin >> name;
@@ -142,7 +147,7 @@ void import(Aktie *aktien, int num_of_aktien) {
 	std::ifstream myReadFile(aktien[aktie_index].name.insert(0, AKTIEN_PATH).append(".csv"));
 
 	if (!myReadFile.is_open()) {
-		std::cout << "Could not read file!  " << name;
+		std::cout << CURSOR_INFO << "\x1b[2K\x1b[32m" << "Could not found aktie file with name:  " << name << "\x1b[0m" << std::endl;
 		return;
 	}
 
@@ -246,8 +251,12 @@ void sortFloatArray(float arr[], const int array_length) {
 		}
 	}
 }
-void save(Aktie *aktien, const int hash_table_size, std::string file_name) {
-    std::fstream file(file_name.insert(0, AKTIEN_PATH), std::ios::out | std::ios::in | std::ios::trunc);
+void save(Aktie *aktien, const int hash_table_size) {
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mFilenname to save hash table into: \x1b[0m" << std::endl;
+	string filename;
+	std::cin >> filename;
+
+    std::fstream file(filename.insert(0, AKTIEN_PATH), std::ios::out | std::ios::in | std::ios::trunc);
 
 	for (int i = 0; i < HASH_TABLE_SIZE; i++) {
 		file.write(aktien[i].getName().c_str(), aktien[i].getName().length());
@@ -257,10 +266,18 @@ void save(Aktie *aktien, const int hash_table_size, std::string file_name) {
 
 	file.close();
 }
-void load(Aktie *aktien, const int hash_table_size, std::string file_name) {
-    std::fstream file(file_name.insert(0, AKTIEN_PATH));
+void load(Aktie *aktien, const int hash_table_size) {
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mFilename to load hash table from: \x1b[0m" << std::endl;
+	string filename;
+	std::cin >> filename;
 
-	for (int i = 0; i < HASH_TABLE_SIZE; i++) {
+    std::fstream file(filename.insert(0, AKTIEN_PATH));
+	if (!file.is_open()) {
+		std::cout << CURSOR_INFO << "\x1b[2K\x1b[32m" << "Could not read file!  " << filename << "\x1b[0m" << std::endl;
+		return;
+	}
+
+	for (int i = 0; i < hash_table_size; i++) {
 		file >> aktien[i].name;
 		file >> aktien[i].kuerzel;
 		file >> aktien[i].wkn;
