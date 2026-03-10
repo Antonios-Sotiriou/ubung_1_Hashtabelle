@@ -26,8 +26,10 @@ class Aktie {
 		string kuerzel;
 		AktieData *aktData; //Kursdaten
 
-	private:
+	
 		void freeAktData(void);
+
+	private:
 };
 
 #endif // !AKTIE_H
