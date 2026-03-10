@@ -80,3 +80,24 @@ Funktionsweise<br>
         In einer Schleife werden für jedes Element der Hash-Tabelle der Name, das Kürzel und die WKN nacheinander als Binärdaten/Strings geschrieben.<br>
     Abschluss:<br> 
         Der Stream wird explizit geschlossen.<br>
+
+# load
+Die Funktion lädt Aktiendaten aus einer Textdatei und speichert diese in einer bereitgestellten Hash-Tabelle (Array).<br>
+
+Parameter:<br>
+    aktien (Aktie*):<br>
+        Pointer auf das Array (Hash-Tabelle), in das die Daten geladen werden sollen.<br>
+    hash_table_size (const int):<br> 
+        Die Anzahl der Einträge, die aus der Datei gelesen werden sollen<br>
+
+Funktionsweise:<br>
+    Benutzereingabe:<br> 
+        Die Funktion fragt über die Konsole nach einem Dateinamen.<br>
+    Pfad-Konstruktion:<br> 
+        Der eingegebene Name wird mit dem Präfix DATABASE_PATH ergänzt.<br>
+    Fehlerbehandlung:<br> 
+        Falls die Datei nicht geöffnet werden kann, wird eine Fehlermeldung ausgegeben und die Funktion abgebrochen.<br>
+    Einlesen:<br> 
+        Die Funktion iteriert über die Größe der Hash-Tabelle und liest pro Eintrag die Felder name, kuerzel und wkn ein.<br>
+    Abschluss:<br> 
+        Die Datei wird nach dem Lesevorgang geschlossen.<br>
