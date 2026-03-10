@@ -21,7 +21,7 @@
 #define NUM_OF_AKTIEN     999
 #define HASH_TABLE_SIZE   1301
 
-int hashFunction(std::string &str, const int hash_table_size);
+int hashFunction(Aktie* aktien,std::string &str, const int hash_table_size, int search_flag);
 int verifyInput(std::string& input);
 void dispatchInput(Aktie *aktData, int input);
 void setTerminalSize(const int rows, const int columns);
@@ -29,12 +29,15 @@ void clearScreen(void);
 void logError(const char error[]);
 void logInfo(const char error[]);
 void clearLogs(void);
+void add(Aktie* aktien);
 void import(Aktie *aktien, int num_of_aktien);
+void search(Aktie* aktien);
 void initAktie(std::ifstream &file, AktieData *aktieData);
 void plot(Aktie *aktien, int num_of_aktien);
 void sortFloatArray(float arr[], const int array_length);
 void save(Aktie* aktien, const int hash_table_size);
 void load(Aktie *aktien, const int hash_table_size);
+int collisionFunction(Aktie* aktieArray, std::string& str, int index, int search_flag);
 
 int main(int argc, char argv[]) {
 	using namespace std;
@@ -62,7 +65,7 @@ int main(int argc, char argv[]) {
 
 	return 0;
 }
-int hashFunction(std::string& str, const int hash_table_size) {
+int hashFunction(Aktie* aktieArray,std::string& str, const int hash_table_size,int search_flag) {
 	int hash = 0;
 	int length = 4;
 
@@ -74,7 +77,30 @@ int hashFunction(std::string& str, const int hash_table_size) {
 		hash += str[i] * static_cast<int>(std::pow(31, length - (i + 1)));
 	}
 
-	return hash % hash_table_size;
+	return collisionFunction(aktieArray,str,hash % hash_table_size,search_flag);
+}
+int collisionFunction(Aktie* aktieArray,std::string& str,int index,int search_flag) {
+	string compare = "";
+	if (search_flag == 1) {
+		compare = str;
+	}
+
+	if (aktieArray[index].getKuerzel() == compare) {
+		return index;
+	}
+	int offset = 1;
+	int negation = 1;
+	while (!(aktieArray[index + (negation * offset * offset)].getKuerzel() == compare)) {
+		if (negation < 0) {
+			negation *= -1;
+			offset *= 2;
+		}
+		else
+		{
+			negation *= -1;
+		}
+	}
+	return index + (negation * offset * offset);
 }
 int verifyInput(std::string &input) {
 
@@ -93,7 +119,7 @@ int verifyInput(std::string &input) {
 void dispatchInput(Aktie *aktien, int input) {
 	switch (input) {
 		case 1:
-			// ADD
+			add(aktien);
 			break;
 		case 2:
 			// DEL
@@ -102,7 +128,7 @@ void dispatchInput(Aktie *aktien, int input) {
 			import(aktien, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
 			break;
 		case 4:
-			// SEARCH
+			search(aktien); // only kurzel search implemented
 			break;
 		case 5:
             plot(aktien, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
@@ -132,6 +158,19 @@ void logInfo(const char info[]) {
 void clearLogs(void) {
 	std::cout << CURSOR_ERROR << "\x1b[2K\x1b[0m" << std::endl;
 	std::cout << CURSOR_INFO << "\x1b[2K\x1b[0m" << std::endl;
+}
+void add(Aktie* aktien) {
+	string name;
+	string wkn;
+	string kuerzel;
+	std::cout << "Give name of Aktie: ";
+	std::cin >> name;
+	std::cout << "Give kurzel of Aktie: ";
+	std::cin >> kuerzel;
+	std::cout << "Give wkn of Aktie: ";
+	std::cin >> wkn;
+	Aktie newAktie(name,wkn,kuerzel);
+	aktien[hashFunction(aktien, kuerzel, HASH_TABLE_SIZE,0)] = newAktie;
 }
 void import(Aktie *aktien, int num_of_aktien) {
 	clearLogs();
@@ -188,6 +227,13 @@ void initAktie(std::ifstream &file, AktieData *aktieData) {
 
 	token = strtok_s(nullptr, delimiters, &context);
 	aktieData->low = stof(token);
+}
+void search(Aktie* aktien) {
+	string name;
+	std::cout << "give aktie name";
+	cin >> name;
+
+	Aktie result = aktien[hashFunction(aktien, name, HASH_TABLE_SIZE, 1)];
 }
 void plot(Aktie *aktien, int num_of_aktien) {
 

@@ -18,6 +18,7 @@ class Aktie {
 		void setKuerzel(const string newKuerzel);
 		string getWkn();
 		void setWkn(const string newWkn);
+		bool isEmpty();
 
 
 		string wkn;         //Wertpapierkennnummer

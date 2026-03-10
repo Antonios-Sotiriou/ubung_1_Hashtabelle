@@ -43,6 +43,11 @@ string Aktie::getWkn() {
 void Aktie::setWkn(const string newWkn) {
 	wkn = newWkn;
 }
+
+bool Aktie::isEmpty() {
+	return name.empty();
+}
+
 void Aktie::freeAktData(void) {
 	if (aktData != nullptr) {
 		delete aktData;
