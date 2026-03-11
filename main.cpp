@@ -41,6 +41,17 @@ void load(Aktie *aktien, const int hash_table_size);
 int collisionFunction(Aktie* aktieArray, std::string& str, int index, int search_flag);
 int searchWithName(Aktie* aktieArray,string& name);
 
+void logAktien(Aktie *aktien) {
+	clearScreen();
+	for (int i = 0; i < NUM_OF_AKTIEN; i++) {
+		std::cout << "{" << std::endl;
+		std::cout << "    i: " << i << "  " << aktien[i].name << std::endl;
+		std::cout << "    i: " << i << "  " << aktien[i].kuerzel << std::endl;
+		std::cout << "    i: " << i << "  " << aktien[i].wkn << std::endl;
+		std::cout << "}" << std::endl;
+	}
+}
+
 int main(int argc, char argv[]) {
 	using namespace std;
 
@@ -164,42 +175,54 @@ void logInfo(const char info[]) {
 void clearLogs(void) {
 	std::cout << CURSOR_ERROR << "\x1b[2K\x1b[0m" << std::endl;
 	std::cout << CURSOR_INFO << "\x1b[2K\x1b[0m" << std::endl;
+	std::cout << CURSOR_INFO << "\x1b[0J" << std::endl;
 }
 void add(Aktie* aktien) {
+	clearLogs();
 	string name;
 	string wkn;
 	string kuerzel;
-	std::cout << "Enter name of Aktie: ";
+
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter name: \x1b[23;13H\x1b[0m";
 	std::cin >> name;
-	std::cout << "Enter kurzel of Aktie: ";
+
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Kuerzel: \x1b[23;16H\x1b[0m";
 	std::cin >> kuerzel;
-	std::cout << "Enter wkn of Aktie: ";
+
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Wkn: \x1b[23;12H\x1b[0m";
 	std::cin >> wkn;
+
 	Aktie newAktie(name,kuerzel,wkn);
-	aktien[hashFunction(aktien, kuerzel, HASH_TABLE_SIZE,0)] = newAktie;
+	int aktie_index = hashFunction(aktien, kuerzel, HASH_TABLE_SIZE,0);
+	if (aktie_index >= 0 && aktie_index < HASH_TABLE_SIZE) {
+		aktien[aktie_index] = newAktie;
+		clearScreen();
+		return;
+	}
+	logError("Could not add Aktie");
 }
 void deleteAktie(Aktie* aktien) {
-	std::cout << "Delete with[ a. Kuerzel | b. Name ]: ";
+	clearLogs();
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mDelete with[ a. Kuerzel | b. Name ]: \x1b[23;38H\x1b[0m";
 	string input;
 	cin >> input;
 	while (input.length() > 1 && (input[0] != 'a' || input[0] != 'b')) {
-		std::cout << "invalid Input ";
+		logError("invalid Input");
 		cin >> input;
 	}
 
 	int result;
 	if (input[0] == 'a') {
-		std::cout << "Enter aktie kuerzel: ";
+		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Kuerzel: \x1b[23;22H\x1b[0m";
 		cin >> input;
 		result = hashFunction(aktien, input, HASH_TABLE_SIZE, 1);
-	}
-	else {
-		std::cout << "Enter aktie name: ";
+	} else {
+		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Name: \x1b[23;19H\x1b[0m";
 		cin >> input;
 		result = searchWithName(aktien, input);
 	}
 	if (result == -1) {
-		std::cout << "Aktie could not be found, delete action terminated\n";
+		logInfo("Aktie could not be found, delete action terminated");
 		return;
 	}
 	aktien[result].setKuerzel("");
@@ -215,11 +238,12 @@ void import(Aktie *aktien, int num_of_aktien) {
 
 	int aktie_index = 0;
 	if (name[0] == 'a') {                                   // O(n)
-		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Kuerzel: \x1b[23;21H\x1b[0m";
+		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Kuerzel: \x1b[23;22H\x1b[0m";
 		cin >> name;
 		aktie_index = hashFunction(aktien, name, HASH_TABLE_SIZE, 1);
+		name = aktien[aktie_index].name;
 	} else if (name[0] == 'b') {                           // O(n)
-		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Name: \x1b[23;18H\x1b[0m";
+		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Name: \x1b[23;19H\x1b[0m";
 		cin >> name;
 		aktie_index = searchWithName(aktien, name);
 	} else {                                               // O(n)
@@ -235,7 +259,7 @@ void import(Aktie *aktien, int num_of_aktien) {
 	    aktien[aktie_index].aktData = new AktieData[sizeof(AktieData) * num_of_aktien];
 	}
 
-	std::ifstream myReadFile(aktien[aktie_index].name.insert(0, AKTIEN_PATH).append(".csv"));
+	std::ifstream myReadFile(name.insert(0, AKTIEN_PATH).append(".csv"));
 
 	if (!myReadFile.is_open()) {
 		std::cout << CURSOR_INFO << "\x1b[2K\x1b[31m" << "Could not found aktie file with name: " << name << "\x1b[0m" << std::endl;
@@ -281,64 +305,56 @@ void initAktie(std::ifstream &file, AktieData *aktieData) {
 	aktieData->low = stof(token);
 }
 void search(Aktie* aktien) {
-
-	std::cout << "Search with[ a. Kuerzel | b. Name ]: ";
+	clearLogs();
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mSearch with[ a. Kuerzel | b. Name ]: \x1b[23;38H\x1b[0m";
 	string input;
 	cin >> input;
 	while (input.length() > 1 && (input[0] != 'a' || input[0] != 'b')) {
-		std::cout << "invalid Input ";
+		logError("invalid Input ");
 		cin >> input;
 	}
 
-	int result;
+	int aktie_index;
 	if (input[0] == 'a') {
-		std::cout << "Enter aktie kuerzel: ";
+		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Kuerzel: \x1b[23;22H\x1b[0m";
 		cin >> input;
-		result = hashFunction(aktien, input, HASH_TABLE_SIZE, 1);
-	}
-	else {
-		std::cout << "Enter aktie name: ";
+		aktie_index = hashFunction(aktien, input, HASH_TABLE_SIZE, 1);
+	} else if (input[0] == 'b') {
+		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Name: \x1b[23;19H\x1b[0m";
 		cin >> input;
-		result = searchWithName(aktien,input);
-	}
-	if (result == -1) {
-		std::cout << "Aktie could not be found\n";
+		aktie_index = searchWithName(aktien, input);
+	} else {
+		logError("Invalid Option");
 		return;
 	}
-	if (aktien[result].aktData == nullptr) {
-		std::cout << "No data in Aktie";
+	if (aktie_index == -1) {
+		logError("Aktie could not be found\n");
 		return;
 	}
-	std::cout << "Date: " << aktien[result].aktData[0].date << std::endl;
-	std::cout << "Close: " << aktien[result].aktData[0].close << std::endl;
-	std::cout << "Volume: " << aktien[result].aktData[0].volume << std::endl;
-	std::cout << "Open: " << aktien[result].aktData[0].open << std::endl;
-	std::cout << "High: " << aktien[result].aktData[0].high << std::endl;
-	std::cout << "Low: " << aktien[result].aktData[0].low << std::endl;
-	
+
+	aktien[aktie_index].printAktie();
 }
-int searchWithName(Aktie* aktieArray, string& name) {
-	for (int i = 0;i < HASH_TABLE_SIZE;i++) {
+int searchWithName(Aktie *aktieArray, string& name) {
+	for (int i = 0; i < HASH_TABLE_SIZE; i++) {
 		if (aktieArray[i].getName() == name) {
 			return i;
 		}
 	}
-	//if not found
 	return -1;
 }
 void plot(Aktie *aktien, int num_of_aktien) {
 	clearLogs();
-	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mPlot with[ a. Kuerzel | b. Name ]: \x1b[23;38H\x1b[0m";
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mPlot with[ a. Kuerzel | b. Name ]: \x1b[23;36H\x1b[0m";
 	string name;
 	cin >> name;
 
 	int aktie_index = 0;
 	if (name[0] == 'a') {                                   // O(n)
-		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Kuerzel: \x1b[23;21H\x1b[0m";
+		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Kuerzel: \x1b[23;22H\x1b[0m";
 		cin >> name;
 		aktie_index = hashFunction(aktien, name, HASH_TABLE_SIZE, 1);
 	} else if (name[0] == 'b') {                           // O(n)
-		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Name: \x1b[23;18H\x1b[0m";
+		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Name: \x1b[23;19H\x1b[0m";
 		cin >> name;
 		aktie_index = searchWithName(aktien, name);
 	} else {                                               // O(n)
@@ -347,6 +363,11 @@ void plot(Aktie *aktien, int num_of_aktien) {
 	}
 	if (aktie_index == -1) {
 		logError("Aktie could not be found");
+		return;
+	}
+
+	if (aktien[aktie_index].aktData == nullptr) {
+		logInfo("No data in Aktie. Load data first");
 		return;
 	}
 
@@ -405,21 +426,22 @@ void sortFloatArray(float arr[], const int array_length) {
 	}
 }
 void save(Aktie *aktien, const int hash_table_size) {
-	std::cout << "\x1b[23;0H\x1b[2K\x1b[31mFilenname to save hash table into: \x1b[0m";
+	clearLogs();
+	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mFilename to save hash table into: \x1b[0m";
 	string filename;
 	std::cin >> filename;
 
     std::fstream file(filename.insert(0, DATABASE_PATH), std::ios::out | std::ios::in | std::ios::trunc);
 
-	for (int i = 0; i < HASH_TABLE_SIZE; i++) {         // O(n)
-		file.write(aktien[i].getName().c_str(), aktien[i].getName().length());
-		file.write(aktien[i].getKuerzel().c_str(), aktien[i].getKuerzel().length());
-		file.write(aktien[i].getWkn().c_str(), aktien[i].getWkn().length());
+	for (int i = 0; i < hash_table_size; i++) {         // O(n)
+		file << aktien[i].name << "," << aktien[i].kuerzel << "," << aktien[i].wkn << std::endl;
 	}
 
 	file.close();
 }
 void load(Aktie *aktien, const int hash_table_size) {
+	clearLogs();
+	using namespace std;
 	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mFilename to load hash table from: \x1b[0m";
 	string filename;
 	std::cin >> filename;
@@ -430,10 +452,28 @@ void load(Aktie *aktien, const int hash_table_size) {
 		return;
 	}
 
+	string line;
+	const char *delimiters = ",";
+	char *context = nullptr;
+	char *token = nullptr;
+
 	for (int i = 0; i < hash_table_size; i++) {    // O(n)
-		file >> aktien[i].name;
-		file >> aktien[i].kuerzel;
-		file >> aktien[i].wkn;
+
+		getline(file, line);
+		token = strtok_s((char*)line.c_str(), delimiters, &context);
+		if (token != nullptr) {
+			aktien[i].name = token;
+		}
+
+		token = strtok_s(nullptr, delimiters, &context);
+		if (token != nullptr) {
+			aktien[i].kuerzel = token;
+		}
+
+		token = strtok_s(nullptr, delimiters, &context);
+		if (token != nullptr) {
+		    aktien[i].wkn = token;
+		}
 	}
 
 	file.close();

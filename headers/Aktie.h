@@ -12,6 +12,7 @@ class Aktie {
 		Aktie();
 		Aktie(string name, string wkn, string kuerzel);
 		~Aktie();
+
 		string getName();
 		void setName(const string newName);
 		string getKuerzel();
@@ -26,7 +27,8 @@ class Aktie {
 		string kuerzel;
 		AktieData *aktData; //Kursdaten
 
-	
+	    void printAktie(void) const;
+
 		void freeAktData(void);
 
 	private:

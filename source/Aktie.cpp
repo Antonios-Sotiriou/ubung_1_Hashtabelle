@@ -48,6 +48,14 @@ bool Aktie::isEmpty() {
 	return name.empty();
 }
 
+void Aktie::printAktie(void) const {
+	std::cout << "{" << std::endl;
+	std::cout << "    Name   : " << name << std::endl;
+	std::cout << "    Kuerzel: " << kuerzel << std::endl;
+	std::cout << "    Wkn    : " << wkn << std::endl;
+	std::cout << "}" << std::endl;
+}
+
 void Aktie::freeAktData(void) {
 	if (aktData != nullptr) {
 		delete aktData;
