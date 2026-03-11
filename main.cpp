@@ -88,6 +88,7 @@ int collisionFunction(Aktie* aktieArray,std::string& str,int index,int search_fl
 	if (aktieArray[index].getKuerzel() == compare) {
 		return index;
 	}
+	cout << "comare: " << compare << " with " << aktieArray[index].getKuerzel();
 	int offset = 1;
 	int negation = 1;
 	while (!(aktieArray[index + (negation * offset * offset)].getKuerzel() == compare)) {
@@ -100,10 +101,11 @@ int collisionFunction(Aktie* aktieArray,std::string& str,int index,int search_fl
 			negation *= -1;
 		}
 		if (index + (negation * offset * offset) >= HASH_TABLE_SIZE || index + (negation * offset * offset) < 0) {
-			std::cout << "out of bounce";
+			//-1 means collisionFunction went out of bounce
 			return -1;
 		}
 	}
+	cout << index + (negation * offset * offset);
 	return index + (negation * offset * offset);
 }
 int verifyInput(std::string &input) {
@@ -132,7 +134,7 @@ void dispatchInput(Aktie *aktien, int input) {
 			import(aktien, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
 			break;
 		case 4:
-			search(aktien); // only kurzel search implemented
+			search(aktien);
 			break;
 		case 5:
             plot(aktien, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
@@ -173,8 +175,8 @@ void add(Aktie* aktien) {
 	std::cin >> kuerzel;
 	std::cout << "Enter wkn of Aktie: ";
 	std::cin >> wkn;
-	Aktie newAktie(name,wkn,kuerzel);
-	//aktien[hashFunction(aktien, kuerzel, HASH_TABLE_SIZE,0)] = newAktie;
+	Aktie newAktie(name,kuerzel,wkn);
+	aktien[hashFunction(aktien, kuerzel, HASH_TABLE_SIZE,0)] = newAktie;
 }
 void deleteAktie(Aktie* aktien) {
 	std::cout << "Delete with[ a. Kuerzel | b. Name ]: ";
@@ -301,6 +303,10 @@ void search(Aktie* aktien) {
 	}
 	if (result == -1) {
 		std::cout << "Aktie could not be found\n";
+		return;
+	}
+	if (aktien[result].aktData == nullptr) {
+		std::cout << "No data in Aktie";
 		return;
 	}
 	std::cout << "Date: " << aktien[result].aktData[0].date << std::endl;
