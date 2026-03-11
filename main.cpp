@@ -30,7 +30,7 @@ void logError(const char error[]);
 void logInfo(const char error[]);
 void clearLogs(void);
 void add(Aktie* aktien);
-void deleteA(Aktie* aktien);
+void deleteAktie(Aktie* aktien);
 void import(Aktie *aktien, int num_of_aktien);
 void search(Aktie* aktien);
 void initAktie(std::ifstream &file, AktieData *aktieData);
@@ -44,16 +44,14 @@ int searchWithName(Aktie* aktieArray,string& name);
 int main(int argc, char argv[]) {
 	using namespace std;
 
-	//AktieData *aktData = new AktieData[sizeof(AktieData) * NUM_OF_AKTIEN];  // Hardcoded Value for Aktien. Must be changed!
 	Aktie *aktien = new Aktie[sizeof(Aktie) * HASH_TABLE_SIZE];
-	aktien[633] = Aktie("AMAZON", "AMZN", "906866");
 
 	setTerminalSize(31, 120);
 
 	string input;
 	while (1) {
 
-		displayMenu();
+		//displayMenu();
 		cin >> input;
 		int option = verifyInput(input);
 		if (option == 8) {
@@ -79,7 +77,7 @@ int hashFunction(Aktie* aktieArray,std::string& str, const int hash_table_size,i
 		hash += str[i] * static_cast<int>(std::pow(31, length - (i + 1)));
 	}
 
-	return collisionFunction(aktieArray,str,hash % hash_table_size,search_flag);
+	return collisionFunction(aktieArray, str, (hash % hash_table_size) ,search_flag);
 }
 int collisionFunction(Aktie* aktieArray,std::string& str,int index,int search_flag) {
 	string compare = "";
@@ -128,7 +126,7 @@ void dispatchInput(Aktie *aktien, int input) {
 			add(aktien);
 			break;
 		case 2:
-			deleteA(aktien);
+			deleteAktie(aktien);
 			break;
 		case 3:
 			import(aktien, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
@@ -169,32 +167,32 @@ void add(Aktie* aktien) {
 	string name;
 	string wkn;
 	string kuerzel;
-	std::cout << "Give name of Aktie: ";
+	std::cout << "Enter name of Aktie: ";
 	std::cin >> name;
-	std::cout << "Give kurzel of Aktie: ";
+	std::cout << "Enter kurzel of Aktie: ";
 	std::cin >> kuerzel;
-	std::cout << "Give wkn of Aktie: ";
+	std::cout << "Enter wkn of Aktie: ";
 	std::cin >> wkn;
 	Aktie newAktie(name,wkn,kuerzel);
-	aktien[hashFunction(aktien, kuerzel, HASH_TABLE_SIZE,0)] = newAktie;
+	//aktien[hashFunction(aktien, kuerzel, HASH_TABLE_SIZE,0)] = newAktie;
 }
-void deleteA(Aktie* aktien) {
-	std::cout << "Whould you like to search with a.kurzel or b.name to delete: ";
+void deleteAktie(Aktie* aktien) {
+	std::cout << "Delete with[ a. Kuerzel / b. Name]: ";
 	string input;
 	cin >> input;
 	while (input.length() > 1 && (input[0] != 'a' || input[0] != 'b')) {
-		std::cout << "invalid: ";
+		std::cout << "invalid Input ";
 		cin >> input;
 	}
 
 	int result;
 	if (input[0] == 'a') {
-		std::cout << "Give aktie kuerzel: ";
+		std::cout << "Enter aktie kuerzel: ";
 		cin >> input;
 		result = hashFunction(aktien, input, HASH_TABLE_SIZE, 1);
 	}
 	else {
-		std::cout << "Give aktie name: ";
+		std::cout << "Enter aktie name: ";
 		cin >> input;
 		result = searchWithName(aktien, input);
 	}
@@ -213,7 +211,8 @@ void import(Aktie *aktien, int num_of_aktien) {
 	string name;
 	std::cin >> name;
 
-	int aktie_index = hashFunction(name, HASH_TABLE_SIZE);
+	int aktie_index = hashFunction(aktien, name, HASH_TABLE_SIZE, 1);
+	std::cout << "AKTIE INDEX.:  " << aktie_index;
 	if (aktien[aktie_index].aktData == nullptr) {
 	    aktien[aktie_index].aktData = new AktieData[sizeof(AktieData) * num_of_aktien];
 	}
@@ -265,22 +264,22 @@ void initAktie(std::ifstream &file, AktieData *aktieData) {
 }
 void search(Aktie* aktien) {
 
-	std::cout << "Whould you like to search with a.kurzel or b.name: ";
+	std::cout << "Search with[ a. Kuerzel / b. Name]: ";
 	string input;
 	cin >> input;
 	while (input.length() > 1 && (input[0] != 'a' || input[0] != 'b')) {
-		std::cout << "invalid: ";
+		std::cout << "invalid Input ";
 		cin >> input;
 	}
 
 	int result;
 	if (input[0] == 'a') {
-		std::cout << "Give aktie kuerzel: ";
+		std::cout << "Enter aktie kuerzel: ";
 		cin >> input;
 		result = hashFunction(aktien, input, HASH_TABLE_SIZE, 1);
 	}
 	else {
-		std::cout << "Give aktie name: ";
+		std::cout << "Enter aktie name: ";
 		cin >> input;
 		result = searchWithName(aktien,input);
 	}
@@ -318,7 +317,7 @@ void plot(Aktie *aktien, int num_of_aktien) {
 	std::cout << std::fixed;
 	std::cout << std::setprecision(2);
 
-	int aktie_index = hashFunction(name, HASH_TABLE_SIZE);
+	int aktie_index = hashFunction(aktien, name, HASH_TABLE_SIZE, 1);
 	if (aktien[aktie_index].aktData == nullptr) {
 		logError("Aktie not found!");
 		return;
