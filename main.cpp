@@ -20,6 +20,7 @@
 
 #define NUM_OF_AKTIEN     999
 #define HASH_TABLE_SIZE   1301
+#define AKTIE_DATA_ROWS   1000
 
 int hashFunction(Aktie* aktien,std::string &str, const int hash_table_size, int search_flag);
 int verifyInput(std::string& input);
@@ -37,7 +38,7 @@ void initAktie(std::ifstream &file, AktieData *aktieData);
 void plot(Aktie *aktien, int num_of_aktien);
 void sortFloatArray(float arr[], const int array_length);
 void save(Aktie* aktien, const int hash_table_size);
-void load(Aktie *aktien, const int hash_table_size);
+void load(Aktie *aktien, const int hash_table_size, const int aktien_days);
 int collisionFunction(Aktie* aktieArray, std::string& str, int index, int search_flag);
 int searchWithName(Aktie* aktieArray,string& name);
 
@@ -142,19 +143,19 @@ void dispatchInput(Aktie *aktien, int input) {
 			deleteAktie(aktien);
 			break;
 		case 3:
-			import(aktien, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
+			import(aktien, AKTIE_DATA_ROWS); // Hardcoded Value for Aktien. Must be changed!
 			break;
 		case 4:
 			search(aktien);
 			break;
 		case 5:
-            plot(aktien, NUM_OF_AKTIEN); // Hardcoded Value for Aktien. Must be changed!
+            plot(aktien, AKTIE_DATA_ROWS); // Hardcoded Value for Aktien. Must be changed!
 			break;
 		case 6:
 			save(aktien, HASH_TABLE_SIZE);
 			break;
 		case 7:
-			load(aktien, HASH_TABLE_SIZE);
+			load(aktien, HASH_TABLE_SIZE, AKTIE_DATA_ROWS);
 			break;
 		default:
 			logError("Only numbers between 1 and 8 are valid");
@@ -175,7 +176,7 @@ void logInfo(const char info[]) {
 void clearLogs(void) {
 	std::cout << CURSOR_ERROR << "\x1b[2K\x1b[0m" << std::endl;
 	std::cout << CURSOR_INFO << "\x1b[2K\x1b[0m" << std::endl;
-	std::cout << CURSOR_INFO << "\x1b[0J" << std::endl;
+	std::cout << CURSOR_INFO << CURSOR_INPUT << "\x1b[0J" << CURSOR_INPUT << std::endl;
 }
 void add(Aktie* aktien) {
 	clearLogs();
@@ -332,7 +333,19 @@ void search(Aktie* aktien) {
 		return;
 	}
 
-	aktien[aktie_index].printAktie();
+	if (aktien[aktie_index].aktData == nullptr) {
+		logError("No data in Aktie");
+		return;
+	}
+
+	std::cout << "{" << std::endl;
+	std::cout << "    Date  : " << aktien[aktie_index].aktData[0].date << std::endl;
+	std::cout << "    Close : " << aktien[aktie_index].aktData[0].close << std::endl;
+	std::cout << "    Volume: " << aktien[aktie_index].aktData[0].volume << std::endl;
+	std::cout << "    Open  : " << aktien[aktie_index].aktData[0].open << std::endl;
+	std::cout << "    High  : " << aktien[aktie_index].aktData[0].high << std::endl;
+	std::cout << "    Low   : " << aktien[aktie_index].aktData[0].low << std::endl;
+	std::cout << "}";
 }
 int searchWithName(Aktie *aktieArray, string& name) {
 	for (int i = 0; i < HASH_TABLE_SIZE; i++) {
@@ -433,13 +446,25 @@ void save(Aktie *aktien, const int hash_table_size) {
 
     std::fstream file(filename.insert(0, DATABASE_PATH), std::ios::out | std::ios::in | std::ios::trunc);
 
-	for (int i = 0; i < hash_table_size; i++) {         // O(n)
+	for (int i = 0; i < hash_table_size; i++) {         // O(n)  Insgesamt O (n^2)
 		file << aktien[i].name << "," << aktien[i].kuerzel << "," << aktien[i].wkn << std::endl;
+
+		if (aktien[i].aktData != nullptr) {
+			for (int j = 0; j < AKTIE_DATA_ROWS; j++) {     // O(n)
+				file << "d," <<
+				aktien[i].aktData[j].date << "," <<
+				aktien[i].aktData[j].close << "," << 
+				aktien[i].aktData[j].volume << "," << 
+				aktien[i].aktData[j].open << "," <<
+				aktien[i].aktData[j].high << "," << 
+				aktien[i].aktData[j].low << std::endl;
+			}
+		}
 	}
 
 	file.close();
 }
-void load(Aktie *aktien, const int hash_table_size) {
+void load(Aktie *aktien, const int hash_table_size, const int aktien_days) {    // gesamte Funktion O(n^2) wenn alle Werte befühlt
 	clearLogs();
 	using namespace std;
 	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mFilename to load hash table from: \x1b[0m";
@@ -457,7 +482,7 @@ void load(Aktie *aktien, const int hash_table_size) {
 	char *context = nullptr;
 	char *token = nullptr;
 
-	for (int i = 0; i < hash_table_size; i++) {    // O(n)
+	for (int i = 0; i < hash_table_size; i++) {    // // O(n)  Insgesamt O (n^2)
 
 		getline(file, line);
 		token = strtok_s((char*)line.c_str(), delimiters, &context);
@@ -473,6 +498,58 @@ void load(Aktie *aktien, const int hash_table_size) {
 		token = strtok_s(nullptr, delimiters, &context);
 		if (token != nullptr) {
 		    aktien[i].wkn = token;
+		}
+
+		// Check if following Date Data in the file, otherwise go a line back.
+		int previous_line = file.tellg();
+		getline(file, line);
+		file.seekg(previous_line);
+
+		token = strtok_s((char*)line.c_str(), delimiters, &context);
+		if (token != nullptr) {
+			string type = token;
+
+			if (type.length() == 1 && type[0] == 'd') {
+				aktien[i].aktData = new AktieData[sizeof(AktieData) * aktien_days];
+
+				// Acquire the day Price data for the Aktien
+				for (int j = 0; j < AKTIE_DATA_ROWS; j++) {         // O(n)
+
+					getline(file, line);
+					// Consume the first d
+					token = strtok_s((char*)line.c_str(), delimiters, &context);
+
+					token = strtok_s(nullptr, delimiters, &context);
+					if (token != nullptr) {
+						aktien[i].aktData[j].date = token;
+					}
+
+					token = strtok_s(nullptr, delimiters, &context);
+					if (token != nullptr) {
+						aktien[i].aktData[j].close = stof(token);
+					}
+
+					token = strtok_s(nullptr, delimiters, &context);
+					if (token != nullptr) {
+						aktien[i].aktData[j].volume = stoi(token);
+					}
+
+					token = strtok_s(nullptr, delimiters, &context);
+					if (token != nullptr) {
+						aktien[i].aktData[j].open = stof(token);
+					}
+
+					token = strtok_s(nullptr, delimiters, &context);
+					if (token != nullptr) {
+						aktien[i].aktData[j].high = stof(token);
+					}
+
+					token = strtok_s(nullptr, delimiters, &context);
+					if (token != nullptr) {
+						aktien[i].aktData[j].low = stof(token);
+					}
+				}
+			}
 		}
 	}
 

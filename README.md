@@ -89,6 +89,8 @@ Parameter:<br>
         Pointer auf das Array (Hash-Tabelle), in das die Daten geladen werden sollen.<br>
     hash_table_size (const int):<br> 
         Die Anzahl der Einträge, die aus der Datei gelesen werden sollen<br>
+    aktien_days (const int):<br> 
+        Die Anzahl der Einträge, die die Täglichen Werte einer Aktie bestimmen<br>
 
 Funktionsweise:<br>
     Benutzereingabe:<br> 
