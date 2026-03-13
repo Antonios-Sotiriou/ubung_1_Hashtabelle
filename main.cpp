@@ -9,14 +9,6 @@
 
 #define DATABASE_PATH     "C:/Users/anton/Desktop/Bachelor_Informatik/Semester_2/ALGOS/ubung_1_Hashtabelle/database/"
 #define AKTIEN_PATH       "C:/Users/anton/Desktop/Bachelor_Informatik/Semester_2/ALGOS/ubung_1_Hashtabelle/aktien/"
-#define AMAZON            "AMAZON"
-#define AMD               "AMD"
-#define APPLE             "APPLE"
-#define CISCO             "CISCO"
-#define META              "META"
-#define MICROSOFT         "MICROSOFT"
-#define QUALCOMM          "QUALCOMM"
-#define TESLA             "TESLA"
 
 #define NUM_OF_AKTIEN     999
 #define HASH_TABLE_SIZE   1301
@@ -41,17 +33,6 @@ void save(Aktie* aktien, const int hash_table_size);
 void load(Aktie *aktien, const int hash_table_size, const int aktien_days);
 int collisionFunction(Aktie* aktieArray, std::string& str, int index, int search_flag);
 int searchWithName(Aktie* aktieArray,string& name);
-
-void logAktien(Aktie *aktien) {
-	clearScreen();
-	for (int i = 0; i < NUM_OF_AKTIEN; i++) {
-		std::cout << "{" << std::endl;
-		std::cout << "    i: " << i << "  " << aktien[i].name << std::endl;
-		std::cout << "    i: " << i << "  " << aktien[i].kuerzel << std::endl;
-		std::cout << "    i: " << i << "  " << aktien[i].wkn << std::endl;
-		std::cout << "}" << std::endl;
-	}
-}
 
 int main(int argc, char argv[]) {
 	using namespace std;
@@ -212,7 +193,7 @@ void deleteAktie(Aktie* aktien) {
 		cin >> input;
 	}
 
-	int result;
+	int aktie_index;
 	if (input[0] == 'a') {
 		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Kuerzel: \x1b[23;22H\x1b[0m";
 		cin >> input;
@@ -222,14 +203,17 @@ void deleteAktie(Aktie* aktien) {
 		cin >> input;
 		result = searchWithName(aktien, input); //O(n)
 	}
-	if (result == -1) {
+	if (aktie_index == -1) {
 		logInfo("Aktie could not be found, delete action terminated");
 		return;
 	}
-	aktien[result].setKuerzel("");
-	aktien[result].setName("");
-	aktien[result].setWkn("");
-	aktien[result].freeAktData();
+
+	aktien[aktie_index].setKuerzel("");
+	aktien[aktie_index].setName("");
+	aktien[aktie_index].setWkn("");
+	if (aktien[aktie_index].aktData != nullptr) {
+	    aktien[aktie_index].freeAktData();
+	}
 }
 void import(Aktie *aktien, int num_of_aktien) {
 	clearLogs();
@@ -451,7 +435,7 @@ void save(Aktie *aktien, const int hash_table_size) {
 
 		if (aktien[i].aktData != nullptr) {
 			for (int j = 0; j < AKTIE_DATA_ROWS; j++) {     // O(n)
-				file << "d," <<
+				file << "d," <<  // Add a d at the start of the line to mark it as Day Data.
 				aktien[i].aktData[j].date << "," <<
 				aktien[i].aktData[j].close << "," << 
 				aktien[i].aktData[j].volume << "," << 
@@ -464,7 +448,7 @@ void save(Aktie *aktien, const int hash_table_size) {
 
 	file.close();
 }
-void load(Aktie *aktien, const int hash_table_size, const int aktien_days) {    // gesamte Funktion O(n^2) wenn alle Werte befühlt
+void load(Aktie *aktien, const int hash_table_size, const int aktien_days) {    // gesamte Funktion O(n^2) wenn alle Werte befÃ¼hlt
 	clearLogs();
 	using namespace std;
 	std::cout << "\x1b[23;0H\x1b[2K\x1b[32mFilename to load hash table from: \x1b[0m";
@@ -482,8 +466,8 @@ void load(Aktie *aktien, const int hash_table_size, const int aktien_days) {    
 	char *context = nullptr;
 	char *token = nullptr;
 
-	for (int i = 0; i < hash_table_size; i++) {    // // O(n)  Insgesamt O (n^2)
-
+	for (int i = 0; i < hash_table_size; i++) {    // // O(n)  Insgesamt O (n^2) worst case. When hash table not full O(n^2)
+		                                                       // best case when hash table empty O(n)
 		getline(file, line);
 		token = strtok_s((char*)line.c_str(), delimiters, &context);
 		if (token != nullptr) {
@@ -499,6 +483,8 @@ void load(Aktie *aktien, const int hash_table_size, const int aktien_days) {    
 		if (token != nullptr) {
 		    aktien[i].wkn = token;
 		}
+
+		aktien[i].aktData = nullptr;
 
 		// Check if following Date Data in the file, otherwise go a line back.
 		int previous_line = file.tellg();

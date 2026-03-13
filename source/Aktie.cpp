@@ -58,7 +58,7 @@ void Aktie::printAktie(void) const {
 
 void Aktie::freeAktData(void) {
 	if (aktData != nullptr) {
-		delete aktData;
+		delete[] aktData;
 		aktData = nullptr;
 	}
 }
