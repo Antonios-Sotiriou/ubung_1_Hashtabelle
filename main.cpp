@@ -85,7 +85,7 @@ int hashFunction(Aktie* aktieArray,std::string& str, const int hash_table_size,i
 		length = static_cast<int>(str.length());
 	}
 
-	for (int i = 0; i < length; i++) {
+	for (int i = 0; i < length; i++) { //O(1)
 		hash += str[i] * static_cast<int>(std::pow(31, length - (i + 1)));
 	}
 
@@ -103,7 +103,7 @@ int collisionFunction(Aktie* aktieArray,std::string& str,int index,int search_fl
 	cout << "comare: " << compare << " with " << aktieArray[index].getKuerzel();
 	int offset = 1;
 	int negation = 1;
-	while (!(aktieArray[index + (negation * offset * offset)].getKuerzel() == compare)) {
+	while (!(aktieArray[index + (negation * offset * offset)].getKuerzel() == compare)) { //O(1)
 		if (negation < 0) {
 			negation *= -1;
 			offset *= 2;
@@ -194,7 +194,7 @@ void add(Aktie* aktien) {
 	std::cin >> wkn;
 
 	Aktie newAktie(name,kuerzel,wkn);
-	int aktie_index = hashFunction(aktien, kuerzel, HASH_TABLE_SIZE,0);
+	int aktie_index = hashFunction(aktien, kuerzel, HASH_TABLE_SIZE,0); //O(1)
 	if (aktie_index >= 0 && aktie_index < HASH_TABLE_SIZE) {
 		aktien[aktie_index] = newAktie;
 		clearScreen();
@@ -216,11 +216,11 @@ void deleteAktie(Aktie* aktien) {
 	if (input[0] == 'a') {
 		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Kuerzel: \x1b[23;22H\x1b[0m";
 		cin >> input;
-		result = hashFunction(aktien, input, HASH_TABLE_SIZE, 1);
+		result = hashFunction(aktien, input, HASH_TABLE_SIZE, 1); //O(1)
 	} else {
 		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Name: \x1b[23;19H\x1b[0m";
 		cin >> input;
-		result = searchWithName(aktien, input);
+		result = searchWithName(aktien, input); //O(n)
 	}
 	if (result == -1) {
 		logInfo("Aktie could not be found, delete action terminated");
@@ -319,11 +319,11 @@ void search(Aktie* aktien) {
 	if (input[0] == 'a') {
 		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Kuerzel: \x1b[23;22H\x1b[0m";
 		cin >> input;
-		aktie_index = hashFunction(aktien, input, HASH_TABLE_SIZE, 1);
+		aktie_index = hashFunction(aktien, input, HASH_TABLE_SIZE, 1); //O(1)
 	} else if (input[0] == 'b') {
 		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Name: \x1b[23;19H\x1b[0m";
 		cin >> input;
-		aktie_index = searchWithName(aktien, input);
+		aktie_index = searchWithName(aktien, input); //O(n)
 	} else {
 		logError("Invalid Option");
 		return;
