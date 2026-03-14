@@ -17,4 +17,9 @@ endif()
 
 target_include_directories(hashtable PUBLIC "${PROJECT_SOURCE_DIR}/")
 
+
+set(PROJECT_AKTIEN_DIR "${PROJECT_SOURCE_DIR}/aktien/")
+set(PROJECT_DATABASE_DIR "${PROJECT_SOURCE_DIR}/database/")
+configure_file("main.h.in" "${PROJECT_SOURCE_DIR}/headers/cmake_variables.h")
+
 # TODO: Fügen Sie bei Bedarf Tests hinzu, und installieren Sie Ziele.

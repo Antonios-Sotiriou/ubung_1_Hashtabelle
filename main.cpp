@@ -7,13 +7,6 @@
 #include "headers/structs.h"
 #include "headers/Aktie.h"
 
-#define DATABASE_PATH     "C:/Users/anton/Desktop/Bachelor_Informatik/Semester_2/ALGOS/ubung_1_Hashtabelle/database/"
-#define AKTIEN_PATH       "C:/Users/anton/Desktop/Bachelor_Informatik/Semester_2/ALGOS/ubung_1_Hashtabelle/aktien/"
-
-#define NUM_OF_AKTIEN     999
-#define HASH_TABLE_SIZE   1301
-#define AKTIE_DATA_ROWS   1000
-
 int hashFunction(Aktie* aktien,std::string &str, const int hash_table_size, int search_flag);
 int verifyInput(std::string& input);
 void dispatchInput(Aktie *aktData, int input);
@@ -81,24 +74,24 @@ int collisionFunction(Aktie* aktieArray,std::string& str,int index,int search_fl
 	if (aktieArray[index].getKuerzel() == compare) {
 		return index;
 	}
-	cout << "comare: " << compare << " with " << aktieArray[index].getKuerzel();
+
 	int offset = 1;
 	int negation = 1;
 	while (!(aktieArray[index + (negation * offset * offset)].getKuerzel() == compare)) { //O(1)
+
 		if (negation < 0) {
 			negation *= -1;
 			offset *= 2;
-		}
-		else
-		{
+		} else {
 			negation *= -1;
 		}
+
 		if (index + (negation * offset * offset) >= HASH_TABLE_SIZE || index + (negation * offset * offset) < 0) {
 			//-1 means collisionFunction went out of bounce
 			return -1;
 		}
 	}
-	cout << index + (negation * offset * offset);
+
 	return index + (negation * offset * offset);
 }
 int verifyInput(std::string &input) {
@@ -124,13 +117,13 @@ void dispatchInput(Aktie *aktien, int input) {
 			deleteAktie(aktien);
 			break;
 		case 3:
-			import(aktien, AKTIE_DATA_ROWS); // Hardcoded Value for Aktien. Must be changed!
+			import(aktien, AKTIE_DATA_ROWS);
 			break;
 		case 4:
 			search(aktien);
 			break;
 		case 5:
-            plot(aktien, AKTIE_DATA_ROWS); // Hardcoded Value for Aktien. Must be changed!
+            plot(aktien, AKTIE_DATA_ROWS);
 			break;
 		case 6:
 			save(aktien, HASH_TABLE_SIZE);
@@ -197,11 +190,11 @@ void deleteAktie(Aktie* aktien) {
 	if (input[0] == 'a') {
 		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Kuerzel: \x1b[23;22H\x1b[0m";
 		cin >> input;
-		result = hashFunction(aktien, input, HASH_TABLE_SIZE, 1); //O(1)
+		aktie_index = hashFunction(aktien, input, HASH_TABLE_SIZE, 1); //O(1)
 	} else {
 		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Name: \x1b[23;19H\x1b[0m";
 		cin >> input;
-		result = searchWithName(aktien, input); //O(n)
+		aktie_index = searchWithName(aktien, input); //O(n)
 	}
 	if (aktie_index == -1) {
 		logInfo("Aktie could not be found, delete action terminated");
@@ -244,7 +237,7 @@ void import(Aktie *aktien, int num_of_aktien) {
 	    aktien[aktie_index].aktData = new AktieData[sizeof(AktieData) * num_of_aktien];
 	}
 
-	std::ifstream myReadFile(name.insert(0, AKTIEN_PATH).append(".csv"));
+	std::ifstream myReadFile(name.insert(0, PROJECT_AKTIEN_DIR).append(".csv"));
 
 	if (!myReadFile.is_open()) {
 		std::cout << CURSOR_INFO << "\x1b[2K\x1b[31m" << "Could not found aktie file with name: " << name << "\x1b[0m" << std::endl;
@@ -322,17 +315,10 @@ void search(Aktie* aktien) {
 		return;
 	}
 
-	std::cout << "{" << std::endl;
-	std::cout << "    Date  : " << aktien[aktie_index].aktData[0].date << std::endl;
-	std::cout << "    Close : " << aktien[aktie_index].aktData[0].close << std::endl;
-	std::cout << "    Volume: " << aktien[aktie_index].aktData[0].volume << std::endl;
-	std::cout << "    Open  : " << aktien[aktie_index].aktData[0].open << std::endl;
-	std::cout << "    High  : " << aktien[aktie_index].aktData[0].high << std::endl;
-	std::cout << "    Low   : " << aktien[aktie_index].aktData[0].low << std::endl;
-	std::cout << "}";
+	aktien[aktie_index].printAktieLastDay();
 }
 int searchWithName(Aktie *aktieArray, string& name) {
-	for (int i = 0; i < HASH_TABLE_SIZE; i++) {
+	for (int i = 0; i < HASH_TABLE_SIZE; i++) {          // O(n) worst case, best case O(1), average O(n).
 		if (aktieArray[i].getName() == name) {
 			return i;
 		}
@@ -346,15 +332,15 @@ void plot(Aktie *aktien, int num_of_aktien) {
 	cin >> name;
 
 	int aktie_index = 0;
-	if (name[0] == 'a') {                                   // O(n)
+	if (name[0] == 'a') {
 		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Kuerzel: \x1b[23;22H\x1b[0m";
 		cin >> name;
 		aktie_index = hashFunction(aktien, name, HASH_TABLE_SIZE, 1);
-	} else if (name[0] == 'b') {                           // O(n)
+	} else if (name[0] == 'b') {
 		std::cout << "\x1b[23;0H\x1b[2K\x1b[32mEnter Aktie Name: \x1b[23;19H\x1b[0m";
 		cin >> name;
 		aktie_index = searchWithName(aktien, name);
-	} else {                                               // O(n)
+	} else {
 		logError("Invalid Option");
 		return;
 	}
@@ -378,7 +364,7 @@ void plot(Aktie *aktien, int num_of_aktien) {
 	for (int i = 29; i >= 0; i--) {                   // O(n)
 		sorted_prices[i] = aktien[aktie_index].aktData[i].close;
 	}
-	sortFloatArray(sorted_prices, 30);                // O(n^2)
+	sortFloatArray(sorted_prices, 30);                // O(n^2) fix
 
 	int move_left = 0;
 	for (int i = 29; i >= 0; i--) {
@@ -398,7 +384,6 @@ void plot(Aktie *aktien, int num_of_aktien) {
 		while ((aktien[aktie_index].aktData[i].close >= sorted_prices[prices_index]) && (prices_index < 30)) {  // O(n)
 			std::cout << "\x1b[" << 30 - prices_index << ";" << cursor_left << "H*";
 			std::cout << "\x1b[" << 30 - prices_index << ";" << cursor_left + 1 << "H*";
-			//std::cout << "\x1b[" << 29 - prices_index << ";" << cursor_left + 2 << "H*";
 			prices_index++;
 		}
 
@@ -428,9 +413,9 @@ void save(Aktie *aktien, const int hash_table_size) {
 	string filename;
 	std::cin >> filename;
 
-    std::fstream file(filename.insert(0, DATABASE_PATH), std::ios::out | std::ios::in | std::ios::trunc);
+    std::fstream file(filename.insert(0, PROJECT_DATABASE_DIR), std::ios::out | std::ios::in | std::ios::trunc);
 
-	for (int i = 0; i < hash_table_size; i++) {         // O(n)  Insgesamt O (n^2)
+	for (int i = 0; i < hash_table_size; i++) {         // O(n)  Insgesamt O (n^2) worst case, best case O(n) average O(n^2)
 		file << aktien[i].name << "," << aktien[i].kuerzel << "," << aktien[i].wkn << std::endl;
 
 		if (aktien[i].aktData != nullptr) {
@@ -455,7 +440,7 @@ void load(Aktie *aktien, const int hash_table_size, const int aktien_days) {    
 	string filename;
 	std::cin >> filename;
 
-    std::fstream file(filename.insert(0, DATABASE_PATH));
+    std::fstream file(filename.insert(0, PROJECT_DATABASE_DIR));
 	if (!file.is_open()) {
 		std::cout << CURSOR_INFO << "\x1b[2K\x1b[31m" << "Could not read file: " << filename << "\x1b[0m" << std::endl;
 		return;
@@ -487,7 +472,7 @@ void load(Aktie *aktien, const int hash_table_size, const int aktien_days) {    
 		aktien[i].aktData = nullptr;
 
 		// Check if following Date Data in the file, otherwise go a line back.
-		int previous_line = file.tellg();
+		std::streamoff previous_line = file.tellg();
 		getline(file, line);
 		file.seekg(previous_line);
 

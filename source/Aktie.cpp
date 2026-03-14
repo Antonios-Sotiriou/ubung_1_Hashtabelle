@@ -56,6 +56,17 @@ void Aktie::printAktie(void) const {
 	std::cout << "}" << std::endl;
 }
 
+void Aktie::printAktieLastDay(void) const {
+	std::cout << "{" << std::endl;
+	std::cout << "    Date  : " << aktData[0].date << std::endl;
+	std::cout << "    Close : " << aktData[0].close << std::endl;
+	std::cout << "    Volume: " << aktData[0].volume << std::endl;
+	std::cout << "    Open  : " << aktData[0].open << std::endl;
+	std::cout << "    High  : " << aktData[0].high << std::endl;
+	std::cout << "    Low   : " << aktData[0].low << std::endl;
+	std::cout << "}";
+}
+
 void Aktie::freeAktData(void) {
 	if (aktData != nullptr) {
 		delete[] aktData;

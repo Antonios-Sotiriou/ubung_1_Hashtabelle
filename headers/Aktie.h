@@ -28,6 +28,7 @@ class Aktie {
 		AktieData *aktData; //Kursdaten
 
 	    void printAktie(void) const;
+		void printAktieLastDay(void) const;
 
 		void freeAktData(void);
 
