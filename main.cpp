@@ -469,56 +469,55 @@ void load(Aktie *aktien, const int hash_table_size, const int aktien_days) {    
 		    aktien[i].wkn = token;
 		}
 
-		aktien[i].aktData = nullptr;
+		if (aktien[i].aktData != nullptr) {
+			aktien[i].freeAktData();
+		} else {
+			aktien[i].aktData = nullptr;
+		}
 
 		// Check if following Date Data in the file, otherwise go a line back.
 		std::streamoff previous_line = file.tellg();
 		getline(file, line);
 		file.seekg(previous_line);
 
-		token = strtok_s((char*)line.c_str(), delimiters, &context);
-		if (token != nullptr) {
-			string type = token;
+		if (line[0] == 'd') {
+			aktien[i].aktData = new AktieData[sizeof(AktieData) * aktien_days];
 
-			if (type.length() == 1 && type[0] == 'd') {
-				aktien[i].aktData = new AktieData[sizeof(AktieData) * aktien_days];
+			// Acquire the day Price data for the Aktien
+			for (int j = 0; j < AKTIE_DATA_ROWS; j++) {         // O(n)
 
-				// Acquire the day Price data for the Aktien
-				for (int j = 0; j < AKTIE_DATA_ROWS; j++) {         // O(n)
+				getline(file, line);
+				// Consume the first d
+				token = strtok_s((char*)line.c_str(), delimiters, &context);
 
-					getline(file, line);
-					// Consume the first d
-					token = strtok_s((char*)line.c_str(), delimiters, &context);
+				token = strtok_s(nullptr, delimiters, &context);
+				if (token != nullptr) {
+					aktien[i].aktData[j].date = token;
+				}
 
-					token = strtok_s(nullptr, delimiters, &context);
-					if (token != nullptr) {
-						aktien[i].aktData[j].date = token;
-					}
+				token = strtok_s(nullptr, delimiters, &context);
+				if (token != nullptr) {
+					aktien[i].aktData[j].close = stof(token);
+				}
 
-					token = strtok_s(nullptr, delimiters, &context);
-					if (token != nullptr) {
-						aktien[i].aktData[j].close = stof(token);
-					}
+				token = strtok_s(nullptr, delimiters, &context);
+				if (token != nullptr) {
+					aktien[i].aktData[j].volume = stoi(token);
+				}
 
-					token = strtok_s(nullptr, delimiters, &context);
-					if (token != nullptr) {
-						aktien[i].aktData[j].volume = stoi(token);
-					}
+				token = strtok_s(nullptr, delimiters, &context);
+				if (token != nullptr) {
+					aktien[i].aktData[j].open = stof(token);
+				}
 
-					token = strtok_s(nullptr, delimiters, &context);
-					if (token != nullptr) {
-						aktien[i].aktData[j].open = stof(token);
-					}
+				token = strtok_s(nullptr, delimiters, &context);
+				if (token != nullptr) {
+					aktien[i].aktData[j].high = stof(token);
+				}
 
-					token = strtok_s(nullptr, delimiters, &context);
-					if (token != nullptr) {
-						aktien[i].aktData[j].high = stof(token);
-					}
-
-					token = strtok_s(nullptr, delimiters, &context);
-					if (token != nullptr) {
-						aktien[i].aktData[j].low = stof(token);
-					}
+				token = strtok_s(nullptr, delimiters, &context);
+				if (token != nullptr) {
+					aktien[i].aktData[j].low = stof(token);
 				}
 			}
 		}
